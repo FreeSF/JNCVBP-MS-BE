@@ -1,11 +1,19 @@
-import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from "@nestjs/graphql";
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from "@nestjs/graphql";
 import { TrainingsService } from "./trainings.service";
 import { Training, TrainingModel } from "./entities/training.entity";
 import { CreateTrainingInput } from "./dto/create-training.input";
 import { UpdateTrainingInput } from "./dto/update-training.input";
 import { VolunteersService } from "../volunteers/volunteers.service";
 import { Volunteer, VolunteerModel } from "../volunteers/entities/volunteer.entity";
+import { PaginatedTrainings } from "./dto/paginated-trainings";
 
+/**
+ * TrainingsResolver is a Nest resolver that handles GraphQL queries and mutations related to Trainings.
+ *
+ * It provides endpoints for creating, retrieving, updating and deleting Trainings.
+ *
+ * @see TrainingsService
+ */
 @Resolver(() => Training)
 export class TrainingsResolver {
   constructor(private readonly trainingsService: TrainingsService, private volunteerService: VolunteersService) {}
@@ -18,6 +26,18 @@ export class TrainingsResolver {
   @Query(() => [Training], { name: "trainings" })
   findAll() {
     return this.trainingsService.findAll();
+  }
+
+  @Query(() => PaginatedTrainings, { name: "paginatedTrainings" })
+  findAllPaginated(
+    @Args("limit", { defaultValue: 10 }) limit: number,
+    @Args("offset", { defaultValue: 0 }) offset: number,
+    @Args("sortField", { defaultValue: "id" }) sortField: string,
+    @Args("sortOrder", { defaultValue: "desc" }) sortOrder: string,
+    @Args("searchText", { defaultValue: "" }) searchText: string,
+    @Args("disabled", { defaultValue: false }) disabled: boolean
+  ) {
+    return this.trainingsService.findPaginated(limit, offset, sortField, sortOrder, searchText, disabled);
   }
 
   @Query(() => [Training])

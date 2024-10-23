@@ -5,7 +5,15 @@ import { CreateEventInput } from "./dto/create-event.input";
 import { UpdateEventInput } from "./dto/update-event.input";
 import { User } from "../users/entities/user.entity";
 import { UsersService } from "../users/users.service";
+import { PaginatedEvents } from "./dto/paginated-events";
 
+/**
+ * EventsResolver is a Nest resolver that handles GraphQL queries and mutations related to events.
+ *
+ * It provides endpoints for creating, retrieving, updating and deleting events.
+ *
+ * @see EventsService
+ */
 @Resolver(() => Event)
 export class EventsResolver {
   constructor(private readonly eventsService: EventsService, private usersService: UsersService) {}
@@ -18,6 +26,18 @@ export class EventsResolver {
   @Query(() => [Event], { name: "events" })
   findAll() {
     return this.eventsService.findAll();
+  }
+
+  @Query(() => PaginatedEvents, { name: "paginatedEvents" })
+  findAllPaginated(
+    @Args("limit", { defaultValue: 10 }) limit: number,
+    @Args("offset", { defaultValue: 0 }) offset: number,
+    @Args("sortField", { defaultValue: "id" }) sortField: string,
+    @Args("sortOrder", { defaultValue: "desc" }) sortOrder: string,
+    @Args("searchText", { defaultValue: "" }) searchText: string,
+    @Args("disabled", { defaultValue: false }) disabled: boolean
+  ) {
+    return this.eventsService.findPaginated(limit, offset, sortField, sortOrder, searchText, disabled);
   }
 
   @Query(() => [Event])
